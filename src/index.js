@@ -26,6 +26,22 @@ app.get('/talker', async (_req, res) => {
   }
 });
 
+app.get('/talker/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  try {
+    const fileContent = await fs.readFile('./src/talker.json', 'utf8');
+    const talkers = JSON.parse(fileContent);
+
+    const talkersById = talkers.find((talker) => talker.id === id);
+    if (!talkersById) {
+      res.status(404).json({ message: 'Pessoa palestrante não encontrada' })
+    }
+    res.status(HTTP_OK_STATUS).json(talkersById);
+  } catch (error) {
+    return error.message('Erro de requisição');
+  }
+});
+
 app.listen(PORT, () => {
   console.log('Online');
 });
