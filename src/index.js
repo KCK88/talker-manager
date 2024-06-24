@@ -44,9 +44,21 @@ app.get('/talker/:id', async (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  // const { email, password } = req.body;
+  const { email, password } = req.body;
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  // const token = crypto.createHash('md5').update('1234').digest('hex').substring(0, 16);
+  if (!email) {
+    res.status(400).json({ message: 'O campo "email" é obrigatório' });
+  }
+  if (!regex.test(email)) {
+    res.status(400).json({ message: 'O "email" deve ter o formato "email@email.com"' });
+  }
+  if (!password) {
+    res.status(400).json({ message: 'O campo "password" é obrigatório' });
+  }
+  if (password.length < 6) {
+    res.status(400).json({ message: 'O "password" deve ter pelo menos 6 caracteres' });
+  }
   const token = crypto.randomBytes(8).toString('hex');
 
   res.status(200).json({ token });
