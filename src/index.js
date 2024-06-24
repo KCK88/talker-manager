@@ -1,5 +1,6 @@
 const express = require('express');
 const fs = require('fs').promises;
+const crypto = require('crypto');
 
 const app = express();
 app.use(express.json());
@@ -40,6 +41,15 @@ app.get('/talker/:id', async (req, res) => {
   } catch (error) {
     return error.message('Erro de requisição');
   }
+});
+
+app.post('/login', (req, res) => {
+  // const { email, password } = req.body;
+
+  // const token = crypto.createHash('md5').update('1234').digest('hex').substring(0, 16);
+  const token = crypto.randomBytes(8).toString('hex');
+
+  res.status(200).json({ token });
 });
 
 app.listen(PORT, () => {
