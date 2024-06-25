@@ -110,6 +110,23 @@ app.put('/talker/:id',
     }
   });
 
+app.delete('/talker/:id', talkerToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+      
+    const fileContent = await fs.readFile(talkPath, 'utf8');
+    const talkers = JSON.parse(fileContent);
+    const talkerIndex = talkers.findIndex((talkerId) => talkerId.id === parseInt(id, 10));
+        
+    talkers.splice(talkerIndex, 1);
+    await fs.writeFile(talkPath, JSON.stringify(talkers, null, 2));
+
+    res.status(204).end(); 
+  } catch (error) {
+    return res.status(HTTP_OK_STATUS).json({ message: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log('Online');
 });
