@@ -14,6 +14,7 @@ app.use(express.json());
 
 const HTTP_OK_STATUS = 200;
 const PORT = process.env.PORT || '3001';
+const talkPath = './src/talker.json';
 
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
@@ -22,7 +23,7 @@ app.get('/', (_request, response) => {
 
 app.get('/talker', async (_req, res) => {
   try {
-    const fileContent = await fs.readFile('./src/talker.json', 'utf8');
+    const fileContent = await fs.readFile(talkPath, 'utf8');
     const talkers = JSON.parse(fileContent);
 
     if (!talkers.length > 0) {
@@ -37,7 +38,7 @@ app.get('/talker', async (_req, res) => {
 app.get('/talker/:id', async (req, res) => {
   const id = Number(req.params.id);
   try {
-    const fileContent = await fs.readFile('./src/talker.json', 'utf8');
+    const fileContent = await fs.readFile(talkPath, 'utf8');
     const talkers = JSON.parse(fileContent);
 
     const talkersById = talkers.find((talker) => talker.id === id);
@@ -65,7 +66,7 @@ app.post('/talker',
   talkerRate,
   async (req, res) => {
     try {
-      const fileContent = await fs.readFile('./src/talker.json', 'utf8');
+      const fileContent = await fs.readFile(talkPath, 'utf8');
       const talkers = JSON.parse(fileContent);
       const { name, age, talk } = req.body;
       
@@ -73,9 +74,37 @@ app.post('/talker',
       const newTalker = { id: newId, name, age, talk };
   
       talkers.push(newTalker);
-      await fs.writeFile('./src/talker.json', JSON.stringify(talkers, null, 2));
+      await fs.writeFile(talkPath, JSON.stringify(talkers, null, 2));
   
       res.status(201).json(newTalker);
+    } catch (error) {
+      return res.status(HTTP_OK_STATUS).json({ message: error.message });
+    }
+  });
+
+app.put('/talker/:id',
+  talkerToken,
+  talkerName,
+  talkerAge,
+  talkerTalk,
+  talkerWatchedAt,
+  talkerRate,
+  async (req, res) => {
+    try {
+      const { name, age, talk } = req.body;
+      const { id } = req.params;
+      
+      const fileContent = await fs.readFile(talkPath, 'utf8');
+      const talkers = JSON.parse(fileContent);
+      const talkerIndex = talkers.findIndex((talkerId) => talkerId.id === parseInt(id, 10));
+        
+      if (talkerIndex === -1) {
+        return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+      }    
+      talkers[talkerIndex] = { ...talkers[talkerIndex], name, age, talk };
+      await fs.writeFile(talkPath, JSON.stringify(talkers, null, 2));
+      console.log(talkers[talkerIndex]);
+      res.status(200).json(talkers[talkerIndex]);    
     } catch (error) {
       return res.status(HTTP_OK_STATUS).json({ message: error.message });
     }
